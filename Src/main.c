@@ -49,6 +49,8 @@ PCD_HandleTypeDef hpcd_USB_FS;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
+void (*SysMemBootJump) (void);
+void BootloaderInit(void);
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USB_PCD_Init(void);
@@ -59,6 +61,32 @@ static void MX_USB_PCD_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+/** Activate the bootloader without BOOT* pins
+*/
+void GoToDFU(void)
+{
+  /* Resets the RCC clock configuration to the default reset state */
+  HAL_RCC_DeInit();
+  
+  /* de-Initialize common part of the HAL and stop the systick */
+  HAL_DeInit();
+  
+  /* Point the PC to the SystemMemory reset vector (+4) */
+  SysMemBootJump = (void (*) (void)) (*((uint32_t *) (0x1FFFC800 + 4)));
+  
+  /* Set the main stack pointer to its default value */
+  __set_MSP(0x20002250);
+  
+  /* Call the STM32 SystemMemory Bootloader */
+  SysMemBootJump();
+  
+  /* wait until reset */
+  for(;;)
+  {
+    __NOP();
+  }
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -68,6 +96,7 @@ static void MX_USB_PCD_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	static int a = 0;
 
   /* USER CODE END 1 */
 
@@ -102,6 +131,10 @@ int main(void)
     /* USER CODE BEGIN 3 */
 		HAL_Delay(500);
 		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		
+		
+		//Enter DFU after a while
+		if(a++ >= 10) GoToDFU();
   }
   /* USER CODE END 3 */
 }
