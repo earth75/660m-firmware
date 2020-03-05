@@ -1,6 +1,6 @@
 # 660m-pcb-firmware
-A C firmware for the 660m-pcb based on STM32CubeMX config files.
-See adrientetar/660m-pcb for details on the associated hardware.
+A C firmware for the 660m based on STM32CubeMX config files.
+See adrientetar/660m for details on the associated hardware.
 
 ## Structure
 This is sample code that was generated using STM32CUbeMX.
